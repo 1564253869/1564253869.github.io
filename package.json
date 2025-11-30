@@ -1,0 +1,13 @@
+{
+  "name": "rpg-game",
+  "version": "1.0.0",
+  "description": "文字RPG对战游戏",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve -s .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["rpg", "game", "text-based"],
+  "author": "张凯",
+  "license": "MIT"
+}
