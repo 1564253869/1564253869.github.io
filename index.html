@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>十八杀</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f9fafb;
+        }
+        .character-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .battle-log {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .skill-button:not(:disabled):hover {
+            transform: scale(1.05);
+        }
+        .health-bar {
+            transition: width 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col items-center py-10 px-4">
+    <div class="max-w-4xl w-full bg-white rounded-xl shadow-lg p-6 mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-2">文字对战游戏</h1>
+        <p class="text-center text-gray-600 mb-6">本网站由张凯搭建</p>
+        
+        <!-- 角色选择界面 -->
+        <div id="character-selection" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <!-- 角色卡片将通过JavaScript动态插入 -->
+        </div>
+        
+        <!-- 对战界面 -->
+        <div id="battle-interface" class="hidden">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                <div class="w-full md:w-5/12 mb-6 md:mb-0">
+                    <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                        <h2 id="player-name" class="text-xl font-semibold text-gray-800 mb-2"></h2>
+                        <div class="flex items-center mb-1">
+                            <span class="text-sm font-medium text-gray-700 mr-2">生命值:</span>
+                            <div class="flex-grow h-4 bg-gray-200 rounded-full overflow-hidden">
+                                <div id="player-health-bar" class="health-bar h-full bg-green-500 rounded-full" style="width: 100%"></div>
+                            </div>
+                            <span id="player-health-text" class="text-sm font-medium text-gray-700 ml-2">100/100</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-2xl font-bold text-gray-700 mx-4 mb-4 md:mb-0">VS</div>
+                
+                <div class="w-full md:w-5/12">
+                    <div class="bg-red-50 rounded-lg p-4 border border-red-200">
+                        <h2 id="ai-name" class="text-xl font-semibold text-gray-800 mb-2"></h2>
+                        <div class="flex items-center mb-1">
+                            <span class="text-sm font-medium text-gray-700 mr-2">生命值:</span>
+                            <div class="flex-grow h-4 bg-gray-200 rounded-full overflow-hidden">
+                                <div id="ai-health-bar" class="health-bar h-full bg-green-500 rounded-full" style="width: 100%"></div>
+                            </div>
+                            <span id="ai-health-text" class="text-sm font-medium text-gray-700 ml-2">100/100</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 技能选择区 -->
+            <div id="skills-section" class="mb-8">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">选择你的技能:</h3>
+                <div id="player-skills" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <!-- 技能按钮将通过JavaScript动态插入 -->
+                </div>
+            </div>
+            
+            <!-- 战斗日志 -->
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">战斗日志:</h3>
+                <div id="battle-log" class="battle-log bg-gray-50 rounded-lg p-4 border border-gray-200 h-40 overflow-y-auto">
+                    <!-- 日志内容将通过JavaScript动态插入 -->
+                </div>
+            </div>
+            
+            <!-- 控制按钮 -->
+            <div class="flex justify-center space-x-4">
+                <button id="reset-btn" class="px-5 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition duration-300">
+                    <i class="fas fa-redo mr-2"></i>重新开始
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="text-center text-gray-600 text-sm mt-auto">
+        <p>&copy; 2025 文字对战游戏. 享受策略对决的乐趣!</p>
+    </footer>
+
+    <script>
+        // 角色数据
+        const characters = [
+            {
+                name: "谭启林",
+                hp: 70,
+                skills: [
+                    { name: "拉雷", damage: 5, type: "法术", stun: true, cd: 2, occupiesTurn: false },
+                    { name: "掏一个", damage: 16, type: "物理", occupiesTurn: true },
+                    { name: "拔吊毛", nextAttackGuaranteed: true, nextAttackDamageMultiplier: 1.5, cd: 2, occupiesTurn: false }
+                ]
+            },
+            {
+                name: "肯追克拉马尔",
+                hp: 80,
+                skills: [
+                    { name: "RAP star", selfDamage: 15, extraTurn: true, occupiesTurn: false },
+                    { name: "靠你娘", damage: 15, type: "物理", addMark: "被靠", occupiesTurn: true },
+                    { 
+                        name: "何意味/何异味", 
+                        limited: true,
+                        condition: (userHp) => userHp < 60,
+                        effects: [
+                            { selfHeal: 20, modifySkill: { skillIndex: 0, newSelfDamage: 40 }, gainExtraTurns: 2 },
+                            { selfDamage: 40, gainExtraTurns: 2 }
+                        ],
+                        occupiesTurn: false 
+                    }
+                ]
+            },
+            {
+                name: "曹博睿",
+                hp: 100,
+                skills: [
+                    { 
+                        name: "三高人群", 
+                        passive: true,
+                        effects: [
+                            { type: "法术反伤", percentage: 50, value: 7 },
+                            { type: "控制抵抗", probability: 0.5 },
+                            { type: "物理增伤", value: 5, nextAttackBonus: 7 }
+                        ]
+                    },
+                    { name: "装b", damage: 13, type: "法术", selfHeal: 10, opponentNextAttackBonus: 5, occupiesTurn: true },
+                    { name: "软硬不吃", duration: 6, damageThreshold: 15, reducedDamage: 15, occupiesTurn: true }
+                ]
+            },
+            {
+                name: "杜找羊",
+                hp: 110,
+                skills: [
+                    { 
+                        name: "传播HIV", 
+                        passive: true,
+                        immune: true,
+                        activeEffect: { 
+                            allGetHIV: true, 
+                            damageMultipliers: [{ probability: 0.5, multiplier: 1 }, { probability: 0.5, multiplier: 4 }],
+                            doubleBaseDamage: true
+                        },
+                        occupiesTurn: true 
+                    },
+                    { name: "讲个冷笑话", nextTurnSkillFailure: 0.5, damageReflection: 0.4, occupiesTurn: true },
+                    { name: "包子客", limitedUses: 2, nextJudgmentSuccess: true, occupiesTurn: false }
+                ]
+            },
+            {
+                name: "茄子",
+                hp: 80,
+                skills: [
+                    { name: "召唤父亲们", summonMin: 1, summonMax: 2, maxSummons: 3, occupiesTurn: true },
+                    { name: "画画", copySkill: true, damageHealReduction: 0.5, occupiesTurn: true },
+                    { name: "废了", limited: true, opponentLastTurnInvalid: true, occupiesTurn: true }
+                ]
+            },
+            {
+                name: "狗",
+                hp: 60,
+                skills: [
+                    { name: "妈！滚", damage: 5, allTargets: true, nextAttackDebuff: 2, occupiesTurn: true, resourceCost: 1 },
+                    { name: "跆拳道", damage: 8, selfHeal: 3, occupiesTurn: true, resourceCost: 1 },
+                    { 
+                        name: "狗神附体", 
+                        passive: true,
+                        effects: [
+                            { priority: "first" },
+                            { condition: (hp) => hp >= 30 && hp <= 50, resourcesPerTurn: 2 },
+                            { 
+                                condition: (hp) => hp < 30, 
+                                resourcesPerTurn: 3, 
+                                controlImmunity: 0.5, 
+                                guaranteedHit: true,
+                                healMultiplier: 2
+                            }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        // 游戏状态
+        let gameState = {
+            player: null,
+            ai: null,
+            currentPlayerHp: 0,
+            currentAiHp: 0,
+            playerResources: 1,
+            aiResources: 1,
+            cooldowns: {},
+            aiCooldowns: {},
+            marks: { player: {}, ai: {} },
+            battleLog: [],
+            gameEnded: false
+        };
+
+        // DOM元素
+        const characterSelection = document.getElementById('character-selection');
+        const battleInterface = document.getElementById('battle-interface');
+        const playerNameElement = document.getElementById('player-name');
+        const aiNameElement = document.getElementById('ai-name');
+        const playerHealthText = document.getElementById('player-health-text');
+        const aiHealthText = document.getElementById('ai-health-text');
+        const playerHealthBar = document.getElementById('player-health-bar');
+        const aiHealthBar = document.getElementById('ai-health-bar');
+        const playerSkillsElement = document.getElementById('player-skills');
+        const battleLogElement = document.getElementById('battle-log');
+        const resetBtn = document.getElementById('reset-btn');
+
+        // 初始化角色选择界面
+        function initCharacterSelection() {
+            characterSelection.innerHTML = '';
+            characters.forEach(character => {
+                const card = document.createElement('div');
+                card.className = 'character-card bg-white rounded-xl shadow-md p-5 cursor-pointer border border-gray-200 transition-all duration-300';
+                card.innerHTML = `
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">${character.name}</h3>
+                    <p class="text-gray-600 mb-3">初始生命值: ${character.hp}</p>
+                    <div class="space-y-2">
+                        ${character.skills.map(skill => `
+                            <div class="text-sm bg-gray-50 p-2 rounded">
+                                <span class="font-medium">${skill.name}</span>
+                                ${skill.occupiesTurn ? '<span class="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">占回合</span>' : '<span class="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">不占回合</span>'}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                card.addEventListener('click', () => selectCharacter(character));
+                characterSelection.appendChild(card);
+            });
+        }
+
+        // 选择角色
+        function selectCharacter(character) {
+            gameState.player = JSON.parse(JSON.stringify(character)); // 深拷贝
+            gameState.currentPlayerHp = character.hp;
+            
+            // 随机选择AI角色（不能与玩家相同）
+            let availableCharacters = characters.filter(c => c.name !== character.name);
+            gameState.ai = JSON.parse(JSON.stringify(availableCharacters[Math.floor(Math.random() * availableCharacters.length)]));
+            gameState.currentAiHp = gameState.ai.hp;
+            
+            // 初始化冷却时间
+            gameState.cooldowns = {};
+            gameState.aiCooldowns = {};
+            
+            // 初始化标记
+            gameState.marks = { player: {}, ai: {} };
+            
+            // 初始化战斗日志
+            gameState.battleLog = [`游戏开始！玩家选择了"${gameState.player.name}"，AI选择了"${gameState.ai.name}"`];
+            
+            // 显示对战界面
+            showBattleInterface();
+        }
+
+        // 显示对战界面
+        function showBattleInterface() {
+            characterSelection.classList.add('hidden');
+            battleInterface.classList.remove('hidden');
+            
+            // 更新角色信息
+            playerNameElement.textContent = gameState.player.name;
+            aiNameElement.textContent = gameState.ai.name;
+            updateHealthDisplay();
+            
+            // 生成技能按钮
+            renderPlayerSkills();
+            
+            // 更新战斗日志
+            updateBattleLog();
+        }
+
+        // 更新生命值显示
+        function updateHealthDisplay() {
+            // 玩家生命值
+            playerHealthText.textContent = `${gameState.currentPlayerHp}/${gameState.player.hp}`;
+            const playerHealthPercentage = (gameState.currentPlayerHp / gameState.player.hp) * 100;
+            playerHealthBar.style.width = `${Math.max(0, playerHealthPercentage)}%`;
+            
+            // AI生命值
+            aiHealthText.textContent = `${gameState.currentAiHp}/${gameState.ai.hp}`;
+            const aiHealthPercentage = (gameState.currentAiHp / gameState.ai.hp) * 100;
+            aiHealthBar.style.width = `${Math.max(0, aiHealthPercentage)}%`;
+            
+            // 根据生命值调整颜色
+            updateHealthBarColor(playerHealthBar, playerHealthPercentage);
+            updateHealthBarColor(aiHealthBar, aiHealthPercentage);
+        }
+
+        // 更新生命条颜色
+        function updateHealthBarColor(bar, percentage) {
+            bar.classList.remove('bg-green-500', 'bg-yellow-500', 'bg-red-500');
+            if (percentage > 60) {
+                bar.classList.add('bg-green-500');
+            } else if (percentage > 30) {
+                bar.classList.add('bg-yellow-500');
+            } else {
+                bar.classList.add('bg-red-500');
+            }
+        }
+
+        // 渲染玩家技能
+        function renderPlayerSkills() {
+            playerSkillsElement.innerHTML = '';
+            gameState.player.skills.forEach((skill, index) => {
+                // 检查冷却时间
+                const isOnCooldown = gameState.cooldowns[skill.name] > 0;
+                const isLimitedUsed = skill.limitedUses !== undefined && 
+                                     (gameState.player[`used_${skill.name}`] || 0) >= skill.limitedUses;
+                
+                // 检查条件技能
+                let isConditionMet = true;
+                if (skill.condition) {
+                    isConditionMet = skill.condition(gameState.currentPlayerHp);
+                }
+                
+                const isDisabled = isOnCooldown || isLimitedUsed || !isConditionMet;
+                
+                const button = document.createElement('button');
+                button.className = `skill-button w-full text-left p-3 rounded-lg transition-all duration-300 ${
+                    isDisabled 
+                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                        : 'bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300'
+                }`;
+                button.disabled = isDisabled;
+                
+                let buttonText = `<span class="font-semibold">${skill.name}</span>`;
+                if (skill.occupiesTurn) {
+                    buttonText += ' <span class="ml-2 text-xs bg-blue-500 text-white px-2 py-1 rounded">占回合</span>';
+                } else {
+                    buttonText += ' <span class="ml-2 text-xs bg-green-500 text-white px-2 py-1 rounded">不占回合</span>';
+                }
+                
+                if (isOnCooldown) {
+                    buttonText += ` <span class="ml-2 text-xs bg-red-500 text-white px-2 py-1 rounded">CD: ${gameState.cooldowns[skill.name]}回合</span>`;
+                }
+                
+                if (skill.limited) {
+                    const used = gameState.player[`used_${skill.name}`] || 0;
+                    buttonText += ` <span class="ml-2 text-xs bg-purple-500 text-white px-2 py-1 rounded">限定技 (${used}/1)</span>`;
+                }
+                
+                if (skill.limitedUses) {
+                    const used = gameState.player[`used_${skill.name}`] || 0;
+                    buttonText += ` <span class="ml-2 text-xs bg-purple-500 text-white px-2 py-1 rounded">限${skill.limitedUses}次 (${used}/${skill.limitedUses})</span>`;
+                }
+                
+                button.innerHTML = buttonText;
+                button.addEventListener('click', () => usePlayerSkill(index));
+                playerSkillsElement.appendChild(button);
+            });
+        }
+
+        // 玩家使用技能
+        function usePlayerSkill(skillIndex) {
+            if (gameState.gameEnded) return;
+            
+            const skill = gameState.player.skills[skillIndex];
+            
+            // 检查是否有足够的资源
+            const resourceCost = skill.resourceCost || (skill.occupiesTurn ? 1 : 0);
+            if (resourceCost > gameState.playerResources) {
+                addToBattleLog("资源不足，无法使用该技能！");
+                return;
+            }
+            
+            // 执行技能效果
+            executeSkillEffect("player", skill);
+            
+            // 消耗资源
+            gameState.playerResources -= resourceCost;
+            
+            // 更新冷却时间
+            if (skill.cd) {
+                gameState.cooldowns[skill.name] = skill.cd;
+            }
+            
+            // 更新限定技使用次数
+            if (skill.limited || skill.limitedUses) {
+                if (!gameState.player[`used_${skill.name}`]) {
+                    gameState.player[`used_${skill.name}`] = 0;
+                }
+                gameState.player[`used_${skill.name}`]++;
+            }
+            
+            // 添加到战斗日志
+            addToBattleLog(`玩家使用了"${skill.name}"`);
+            
+            // 检查游戏是否结束
+            if (checkGameEnd()) return;
+            
+            // AI回合
+            setTimeout(() => aiTurn(), 1000);
+        }
+
+        // AI回合
+        function aiTurn() {
+            if (gameState.gameEnded) return;
+            
+            // AI根据最大收益原则选择技能
+            const availableSkills = gameState.ai.skills.filter(skill => {
+                // 检查冷却时间
+                if (gameState.aiCooldowns[skill.name] > 0) return false;
+                
+                // 检查限定技使用次数
+                if (skill.limited && (gameState.ai[`used_${skill.name}`] || 0) >= 1) return false;
+                
+                // 检查限次技能使用次数
+                if (skill.limitedUses && (gameState.ai[`used_${skill.name}`] || 0) >= skill.limitedUses) return false;
+                
+                // 检查条件
+                if (skill.condition && !skill.condition(gameState.currentAiHp)) return false;
+                
+                return true;
+            });
+            
+            if (availableSkills.length === 0) {
+                addToBattleLog("AI没有可用技能，跳过回合");
+                endTurn();
+                return;
+            }
+            
+            // 简化的AI决策：随机选择一个可用技能
+            const selectedSkill = availableSkills[Math.floor(Math.random() * availableSkills.length)];
+            const skillIndex = gameState.ai.skills.findIndex(s => s.name === selectedSkill.name);
+            
+            // 执行技能效果
+            executeSkillEffect("ai", selectedSkill);
+            
+            // 更新冷却时间
+            if (selectedSkill.cd) {
+                gameState.aiCooldowns[selectedSkill.name] = selectedSkill.cd;
+            }
+            
+            // 更新限定技使用次数
+            if (selectedSkill.limited || selectedSkill.limitedUses) {
+                if (!gameState.ai[`used_${selectedSkill.name}`]) {
+                    gameState.ai[`used_${selectedSkill.name}`] = 0;
+                }
+                gameState.ai[`used_${selectedSkill.name}`]++;
+            }
+            
+            // 添加到战斗日志
+            addToBattleLog(`AI使用了"${selectedSkill.name}"`);
+            
+            // 检查游戏是否结束
+            if (checkGameEnd()) return;
+            
+            // 结束回合
+            endTurn();
+        }
+
+        // 执行技能效果
+        function executeSkillEffect(user, skill) {
+            const isPlayer = user === "player";
+            const target = isPlayer ? "ai" : "player";
+            const targetHp = isPlayer ? gameState.currentAiHp : gameState.currentPlayerHp;
+            const userHp = isPlayer ? gameState.currentPlayerHp : gameState.currentAiHp;
+            
+            // 处理伤害
+            if (skill.damage) {
+                let finalDamage = skill.damage;
+                
+                // 检查是否有伤害减免标记
+                if (gameState.marks[target][skill.name]) {
+                    // "被靠"标记效果：50%概率失效
+                    if (Math.random() < 0.5) {
+                        addToBattleLog(`${isPlayer ? 'AI' : '玩家'}的"${skill.name}"因"被靠"标记失效`);
+                        finalDamage = 0;
+                    } else {
+                        addToBattleLog(`${isPlayer ? 'AI' : '玩家'}的"${skill.name}"受到"被靠"标记影响`);
+                    }
+                    // 清除标记
+                    delete gameState.marks[target][skill.name];
+                }
+                
+                // 应用伤害
+                if (finalDamage > 0) {
+                    if (isPlayer) {
+                        gameState.currentAiHp -= finalDamage;
+                    } else {
+                        gameState.currentPlayerHp -= finalDamage;
+                    }
+                    addToBattleLog(`${isPlayer ? '玩家' : 'AI'}造成${finalDamage}点伤害`);
+                }
+            }
+            
+            // 处理治疗
+            if (skill.selfHeal) {
+                let healAmount = skill.selfHeal;
+                // 检查是否有治疗增强效果（简化处理）
+                if (skill.name === "跆拳道" && user === "狗" && userHp < 30) {
+                    healAmount *= 2; // 狗的被动：二技能回血翻倍
+                }
+                
+                if (isPlayer) {
+                    gameState.currentPlayerHp = Math.min(gameState.currentPlayerHp + healAmount, gameState.player.hp);
+                } else {
+                    gameState.currentAiHp = Math.min(gameState.currentAiHp + healAmount, gameState.ai.hp);
+                }
+                addToBattleLog(`${isPlayer ? '玩家' : 'AI'}恢复${healAmount}点生命值`);
+            }
+            
+            // 处理自损
+            if (skill.selfDamage) {
+                if (isPlayer) {
+                    gameState.currentPlayerHp -= skill.selfDamage;
+                } else {
+                    gameState.currentAiHp -= skill.selfDamage;
+                }
+                addToBattleLog(`${isPlayer ? '玩家' : 'AI'}失去${skill.selfDamage}点生命值`);
+            }
+            
+            // 处理晕眩
+            if (skill.stun) {
+                // 简化处理：下一回合跳过
+                addToBattleLog(`${isPlayer ? 'AI' : '玩家'}被晕眩，下回合将跳过`);
+            }
+            
+            // 处理标记
+            if (skill.addMark) {
+                gameState.marks[target][skill.name] = (gameState.marks[target][skill.name] || 0) + 1;
+                addToBattleLog(`${isPlayer ? 'AI' : '玩家'}的"${skill.name}"获得了"被靠"标记`);
+            }
+            
+            // 更新生命值显示
+            updateHealthDisplay();
+        }
+
+        // 检查游戏是否结束
+        function checkGameEnd() {
+            if (gameState.currentPlayerHp <= 0) {
+                gameState.currentPlayerHp = 0;
+                gameState.gameEnded = true;
+                addToBattleLog("游戏结束！AI获胜！", true);
+                updateHealthDisplay();
+                return true;
+            }
+            
+            if (gameState.currentAiHp <= 0) {
+                gameState.currentAiHp = 0;
+                gameState.gameEnded = true;
+                addToBattleLog("游戏结束！玩家获胜！", true);
+                updateHealthDisplay();
+                return true;
+            }
+            
+            return false;
+        }
+
+        // 结束回合
+        function endTurn() {
+            // 减少冷却时间
+            for (let skillName in gameState.cooldowns) {
+                if (gameState.cooldowns[skillName] > 0) {
+                    gameState.cooldowns[skillName]--;
+                }
+            }
+            
+            for (let skillName in gameState.aiCooldowns) {
+                if (gameState.aiCooldowns[skillName] > 0) {
+                    gameState.aiCooldowns[skillName]--;
+                }
+            }
+            
+            // 清除标记
+            gameState.marks.player = {};
+            gameState.marks.ai = {};
+            
+            // 恢复资源
+            gameState.playerResources = 1;
+            gameState.aiResources = 1;
+            
+            // 更新技能按钮
+            renderPlayerSkills();
+            
+            // 更新生命值显示
+            updateHealthDisplay();
+        }
+
+        // 添加到战斗日志
+        function addToBattleLog(message, isEnd = false) {
+            gameState.battleLog.push(message);
+            updateBattleLog();
+            
+            if (isEnd) {
+                // 游戏结束时显示重新开始按钮
+                resetBtn.classList.remove('hidden');
+            }
+        }
+
+        // 更新战斗日志显示
+        function updateBattleLog() {
+            battleLogElement.innerHTML = '';
+            gameState.battleLog.forEach(log => {
+                const logEntry = document.createElement('div');
+                logEntry.className = 'mb-2 last:mb-0';
+                logEntry.textContent = log;
+                battleLogElement.appendChild(logEntry);
+            });
+            // 滚动到底部
+            battleLogElement.scrollTop = battleLogElement.scrollHeight;
+        }
+
+        // 重新开始游戏
+        function resetGame() {
+            // 重置游戏状态
+            gameState = {
+                player: null,
+                ai: null,
+                currentPlayerHp: 0,
+                currentAiHp: 0,
+                playerResources: 1,
+                aiResources: 1,
+                cooldowns: {},
+                aiCooldowns: {},
+                marks: { player: {}, ai: {} },
+                battleLog: [],
+                gameEnded: false
+            };
+            
+            // 显示角色选择界面
+            battleInterface.classList.add('hidden');
+            characterSelection.classList.remove('hidden');
+            
+            // 隐藏重新开始按钮
+            resetBtn.classList.add('hidden');
+            
+            // 重新初始化
+            initCharacterSelection();
+        }
+
+        // 事件监听器
+        resetBtn.addEventListener('click', resetGame);
+
+        // 初始化游戏
+        window.onload = function() {
+            initCharacterSelection();
+        };
+    </script>
+</body>
+</html>
