@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地精恋物语</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            height: 800px;
+            margin: 0 auto;
+            border: 4px solid #d4af37;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+            background: #000;
+        }
+        
+        #background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            transition: background-image 1s ease;
+            z-index: 1;
+        }
+        
+        #character {
+            position: absolute;
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            height: 600px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center bottom;
+            z-index: 2;
+            transition: opacity 0.5s ease;
+        }
+        
+        #dialogue-box {
+            position: absolute;
+            bottom: 20px;
+            left: 50px;
+            right: 50px;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 3px solid #d4af37;
+            border-radius: 15px;
+            padding: 20px;
+            z-index: 3;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+        }
+        
+        #dialogue-text {
+            height: 100px;
+            overflow-y: auto;
+            font-size: 20px;
+            line-height: 1.5;
+            color: #fff;
+        }
+        
+        #name-tag {
+            position: absolute;
+            top: -30px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #ffd700;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            border: 2px solid #d4af37;
+        }
+        
+        #options-container {
+            position: absolute;
+            bottom: 190px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            z-index: 4;
+            display: none;
+        }
+        
+        .option-btn {
+            display: block;
+            width: 100%;
+            margin-bottom: 12px;
+            padding: 15px;
+            background: linear-gradient(to bottom, #4a2c2a, #2c1e1e);
+            color: white;
+            border: 2px solid #d4af37;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        .option-btn:hover {
+            background: linear-gradient(to bottom, #5a3c3a, #3c2e2e);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .option-btn:active {
+            transform: translateY(1px);
+        }
+        
+        #hearts-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 4;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #d4af37;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        
+        #hearts-title {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #ffd700;
+        }
+        
+        #hearts-display {
+            display: flex;
+            align-items: center;
+        }
+        
+        .heart {
+            width: 32px;
+            height: 32px;
+            margin-left: 5px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        
+        #hearts-percentage {
+            color: white;
+            font-weight: bold;
+            margin-left: 10px;
+            font-size: 20px;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        #progress-bar-container {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        
+        #progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            width: 50%;
+            transition: width 0.5s ease;
+        }
+        
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)), 
+                        url('./Image_1771244878100_970.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            color: white;
+            text-align: center;
+        }
+        
+        #start-title {
+            font-size: 60px;
+            color: #ffd700;
+            margin-bottom: 30px;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+            font-family: 'SimHei', serif;
+            letter-spacing: 3px;
+        }
+        
+        #start-subtitle {
+            font-size: 24px;
+            margin-bottom: 40px;
+            color: #ccc;
+            max-width: 80%;
+            line-height: 1.6;
+        }
+        
+        #start-btn {
+            padding: 18px 50px;
+            font-size: 26px;
+            background: linear-gradient(to bottom, #4a2c2a, #2c1e1e);
+            color: white;
+            border: 3px solid #d4af37;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+        }
+        
+        #start-btn:hover {
+            background: linear-gradient(to bottom, #5a3c3a, #3c2e2e);
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.8);
+        }
+        
+        #story-text {
+            text-align: center;
+            max-width: 80%;
+            margin: 20px auto;
+            font-size: 20px;
+            line-height: 1.6;
+        }
+        
+        .fade-in {
+            animation: fadeIn 1s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .heart-full { 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23FF0000" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'); 
+        }
+        .heart-half { 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23FF0000" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09V21.35z"/></svg>'); 
+        }
+        .heart-empty { 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23555" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'); 
+        }
+        
+        #ending-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 15;
+            color: white;
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        #ending-title {
+            font-size: 50px;
+            color: #ffd700;
+            margin-bottom: 30px;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+        }
+        
+        #ending-message {
+            font-size: 24px;
+            max-width: 80%;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+        
+        #restart-btn {
+            padding: 18px 50px;
+            font-size: 24px;
+            background: linear-gradient(to bottom, #4a2c2a, #2c1e1e);
+            color: white;
+            border: 3px solid #d4af37;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        #restart-btn:hover {
+            background: linear-gradient(to bottom, #5a3c3a, #3c2e2e);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.7);
+        }
+        
+        #character-name {
+            position: absolute;
+            bottom: 170px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: #ffd700;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-weight: bold;
+            border: 2px solid #d4af37;
+            z-index: 3;
+        }
+        
+        .highlight {
+            color: #ffd700;
+            font-weight: bold;
+        }
+        
+        #game-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 4;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 2px solid #d4af37;
+            font-size: 16px;
+        }
+        
+        #scene-indicator {
+            color: #ffd700;
+            margin-top: 5px;
+        }
+        
+        .transition-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            z-index: 20;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .character-expression {
+            position: absolute;
+            top: 50px;
+            right: 50px;
+            width: 150px;
+            height: 150px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: 3;
+            border: 3px solid #d4af37;
+            border-radius: 10px;
+        }
+        
+        #event-trigger {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="background"></div>
+        
+        <div id="character"></div>
+        <div id="character-name">地精</div>
+        
+        <div class="character-expression" id="character-expression"></div>
+        
+        <div id="dialogue-box">
+            <div id="name-tag">地精</div>
+            <div id="dialogue-text">你好，我是地精，很高兴认识你！</div>
+        </div>
+        
+        <div id="options-container">
+            <!-- 选项按钮将通过JavaScript动态生成 -->
+        </div>
+        
+        <div id="hearts-container">
+            <div id="hearts-title">好感度</div>
+            <div id="hearts-display">
+                <div class="heart heart-full"></div>
+                <div class="heart heart-full"></div>
+                <div class="heart heart-full"></div>
+                <div class="heart heart-full"></div>
+                <div class="heart heart-full"></div>
+                <div class="heart heart-full"></div>
+                <div class="heart heart-full"></div>
+                <div class="heart heart-full"></div>
+                <div class="heart heart-full"></div>
+                <div class="heart heart-full"></div>
+                <span id="hearts-percentage">50%</span>
+            </div>
+            <div id="progress-bar-container">
+                <div id="progress-bar"></div>
+            </div>
+        </div>
+        
+        <div id="game-info">
+            <div>《地精恋物语》</div>
+            <div id="scene-indicator">场景：教室内</div>
+        </div>
+        
+        <div id="event-trigger"></div>
+        
+        <div id="start-screen">
+            <h1 id="start-title">地精恋物语</h1>
+            <p id="start-subtitle">在这个平凡的校园里，你遇到了神秘的地精。他有着独特的爱好，只有真正了解他的人才能走进他的内心世界...</p>
+            <button id="start-btn">开始游戏</button>
+        </div>
+        
+        <div id="ending-screen">
+            <h1 id="ending-title">结局</h1>
+            <p id="ending-message">这是结局内容</p>
+            <button id="restart-btn">重新开始</button>
+        </div>
+        
+        <div class="transition-overlay" id="transition-overlay"></div>
+    </div>
+
+    <audio id="bgm" loop>
+        <source src="./トゲナシトゲアリ - 荊の薔薇.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="choice-sound">
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFd2xqZ2RjYF1bWVhXVlVUU1JQT05MS0pJSEdGRURDQkFAPz49PDs6OTg3NjU0MzIxMC8uLSwrKikoJyYlJCMiISAfHh0cGxoZGBcWFRQTEhEQDw4NDAsKCQgHBgUEAwIBAA==" type="audio/wav">
+    </audio>
+    
+    <audio id="ending-sound">
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFd2xqZ2RjYF1bWVhXVlVUU1JQT05MS0pJSEdGRURDQkFAPz49PDs6OTg3NjU0MzIxMC8uLSwrKikoJyYlJCMiISAfHh0cGxoZGBcWFRQTEhEQDw4NDAsKCQgHBgUEAwIBAA==" type="audio/wav">
+    </audio>
+
+    <script>
+        // 游戏数据
+        const gameData = {
+            characterImages: [
+                './Image_1771244672723_517.jpg',
+                './Image_1771244675363_204.jpg',
+                './Image_1771244651034_609.jpg',
+                './Image_1771244660166_74.jpg',
+                './Image_1771244667411_61.jpg'
+            ],
+            backgrounds: {
+                classroom: './Image_1771244878100_970.jpg',
+                afterSchool: './Image_1771244786572_557.jpg',
+                outdoors: './Image_1771244838404_590.jpg'
+            },
+            currentCharacterIndex: 0,
+            currentBackground: 'classroom',
+            affection: 50, // 好感度，范围0-100
+            storyProgress: 0, // 故事进度
+            gameStarted: false,
+            gamePhase: 0, // 0: start, 1: intro, 2: main game, 3: ending
+            
+            // 扩展的故事剧情
+            storyLines: [
+                // 第一幕 - 初遇
+                {
+                    background: 'classroom',
+                    character: 0,
+                    text: "放学后的教室里，夕阳透过窗户洒在课桌上。一个戴着耳机的同学独自坐在角落，专注地看着手机。",
+                    options: null
+                },
+                {
+                    background: 'classroom',
+                    character: 0,
+                    text: "你走近一看，发现他在玩一款战术游戏。那专注的神情让人不禁好奇...",
+                    options: null
+                },
+                {
+                    background: 'classroom',
+                    character: 0,
+                    text: "你轻声问道：“在玩什么游戏这么入迷？”他抬起头，露出一双深邃的眼睛：“暗区突围，你要试试吗？”",
+                    options: [
+                        { text: "好啊！我也玩过类似的", value: 10, condition: 'good', message: "地精眼睛一亮，显得很高兴！" },
+                        { text: "不太感兴趣，你继续玩吧", value: -5, message: "地精的表情有些失落..." },
+                        { text: "听说过，但没玩过，能介绍下吗？", value: 5, message: "地精开始兴奋地讲起游戏机制" }
+                    ]
+                },
+                
+                // 第二幕 - 网络文化
+                {
+                    background: 'classroom',
+                    character: 1,
+                    text: "几天后，地精神秘兮兮地凑近你：“你知道114514是什么意思吗？”",
+                    options: null
+                },
+                {
+                    background: 'classroom',
+                    character: 1,
+                    text: "你感到困惑，但看到他眼中闪烁的期待...",
+                    options: [
+                        { text: "当然知道！那是网络上的经典梗", value: 10, condition: 'good', message: "地精激动地握住了你的手！" },
+                        { text: "不知道，是什么意思？", value: -5, message: "地精叹了口气，显得有些失望" },
+                        { text: "好像听过，但记不清了", value: 0, message: "地精开始详细解释这个梗的来源" }
+                    ]
+                },
+                
+                // 第三幕 - 课外活动
+                {
+                    background: 'outdoors',
+                    character: 2,
+                    text: "周末，地精邀请你去网吧。他说：“这里网速快，适合打游戏。”",
+                    options: null
+                },
+                {
+                    background: 'outdoors',
+                    character: 2,
+                    text: "你们并排坐着，屏幕上显示着《暗区突围》的画面。地精操作娴熟，动作行云流水...",
+                    options: null
+                },
+                {
+                    background: 'outdoors',
+                    character: 2,
+                    text: "“要不要一起双排？”地精问，“我可以带你飞。”",
+                    options: [
+                        { text: "好啊！带我上分", value: 10, condition: 'good', message: "地精开心地教你游戏技巧" },
+                        { text: "我技术不好，你先带我熟悉地图", value: 5, message: "地精耐心地为你讲解地图细节" },
+                        { text: "算了，我随便玩玩就好", value: -5, message: "地精略显失落，但依然陪你玩" }
+                    ]
+                },
+                
+                // 第四幕 - 尴尬话题
+                {
+                    background: 'classroom',
+                    character: 3,
+                    text: "回到学校，地精神秘地说：“你知道柳科企最近换了什么吗？”",
+                    options: null
+                },
+                {
+                    background: 'classroom',
+                    character: 3,
+                    text: "你感到有些不安，但地精眼神中带着一丝期待...",
+                    options: [
+                        { text: "不太懂，但你似乎很兴奋", value: 5, message: "地精神秘地笑了笑" },
+                        { text: "别说了，这个话题不合适", value: -10, condition: 'bad', message: "地精的表情瞬间变得尴尬" },
+                        { text: "（靠近他）告诉我吧，我不会告诉别人的", value: 10, condition: 'good', message: "地精凑近你耳边小声说" }
+                    ]
+                },
+                
+                // 第五幕 - 学业压力
+                {
+                    background: 'classroom',
+                    character: 4,
+                    text: "生物课后，地精愁眉苦脸地坐在座位上。生物老师霍伟刚刚宣布了期中考试成绩。",
+                    options: null
+                },
+                {
+                    background: 'classroom',
+                    character: 4,
+                    text: "你注意到地精的生物成绩并不理想，而霍伟老师正在朝这边走来...",
+                    options: [
+                        { text: "别担心，生物作业我帮你做", value: -10, condition: 'bad', message: "地精摇摇头，坚持要自己完成" },
+                        { text: "要不要我陪你复习生物？", value: 5, message: "地精感激地点点头" },
+                        { text: "算了，我们去玩游戏放松一下", value: 10, condition: 'good', message: "地精眼睛一亮，立即同意" }
+                    ]
+                },
+                
+                // 第六幕 - 心灵交流
+                {
+                    background: 'outdoors',
+                    character: 0,
+                    text: "黄昏时分，你们来到学校天台。地精望着夕阳，若有所思...",
+                    options: null
+                },
+                {
+                    background: 'outdoors',
+                    character: 0,
+                    text: "“你知道吗？其实我有很多爱好，但很少有人能理解。”地精的声音有些低沉。",
+                    options: null
+                },
+                {
+                    background: 'outdoors',
+                    character: 0,
+                    text: "你静静地听着，感受着他内心的孤独...",
+                    options: [
+                        { text: "我能理解，我也有很多小众爱好", value: 10, condition: 'good', message: "地精眼中闪过一丝光芒" },
+                        { text: "告诉我你的爱好，我会试着理解", value: 5, message: "地精开始分享他的兴趣" },
+                        { text: "每个人都有自己的独特之处", value: 0, message: "地精点点头，似乎在思考什么" }
+                    ]
+                },
+                
+                // 第七幕 - 暧昧时刻
+                {
+                    background: 'classroom',
+                    character: 1,
+                    text: "晚自习后，教室里只剩下你们两人。地精突然凑近你...",
+                    options: null
+                },
+                {
+                    background: 'classroom',
+                    character: 1,
+                    text: "他的呼吸轻轻拂过你的耳畔，心跳加速...",
+                    options: [
+                        { text: "（脸红）你在干什么？", value: 5, message: "地精轻笑一声，没有回答" },
+                        { text: "（也靠近他）我也想...", value: 10, condition: 'good', message: "地精的呼吸变得急促" },
+                        { text: "（推开他）这样不行", value: -5, message: "地精有些失望，但尊重你的决定" }
+                    ]
+                },
+                
+                // 第八幕 - 最终告白
+                {
+                    background: 'outdoors',
+                    character: 2,
+                    text: "毕业前夕，地精约你来到学校后花园。樱花飘落，美如仙境。",
+                    options: null
+                },
+                {
+                    background: 'outdoors',
+                    character: 2,
+                    text: "他深吸一口气，似乎在鼓起勇气说什么...",
+                    options: null
+                },
+                {
+                    background: 'outdoors',
+                    character: 2,
+                    text: "“我...我喜欢你。”地精终于说出了这句话，脸上泛起红晕。",
+                    options: [
+                        { text: "我也喜欢你，地精", value: 10, condition: 'good', message: "地精眼中充满喜悦" },
+                        { text: "我很感动，但我需要时间考虑", value: 0, message: "地精点点头，表示理解" },
+                        { text: "我们只适合做朋友", value: -10, condition: 'bad', message: "地精的表情瞬间黯淡" }
+                    ]
+                }
+            ],
+            
+            endings: {
+                perfect: {
+                    title: "完美结局 - 永恒的羁绊",
+                    message: "经过长时间的相处，你完全理解了地精的独特爱好。你们不仅成为了情侣，还一起探索各种小众文化。每当夜深人静时，你们会一起玩游戏、讨论网络梗，有时也会做一些私密的小事。地精说，你是他遇到的唯一能够理解他全部的人。你们的爱情如同樱花般美丽，永远绽放。",
+                    bg: 'outdoors'
+                },
+                good: {
+                    title: "幸福结局 - 心意相通",
+                    message: "你成功赢得了地精的心。虽然不能完全理解他的所有爱好，但你愿意尝试接受。你们经常一起玩游戏，在网络世界中寻找乐趣。地精偶尔会跟你分享一些小众的网络文化，而你也学会了欣赏他的独特之处。你们的关系稳定而甜蜜，虽然偶有分歧，但总能互相包容。",
+                    bg: 'classroom'
+                },
+                neutral: {
+                    title: "普通结局 - 友谊长存",
+                    message: "你们成为了很好的朋友。虽然你和地精之间有好感，但始终无法跨越最后一步。你们依然会一起玩游戏，分享网络趣事，但关系止步于友谊。有时候你会想，如果当初的选择不同，结果会不会不一样呢？无论如何，这段经历让你们都成长了。",
+                    bg: 'classroom'
+                },
+                bad: {
+                    title: "遗憾结局 - 错失良缘",
+                    message: "由于多次选择不当，你和地精的关系逐渐疏远。他对你的兴趣减退，开始回避与你交流。你试图挽回，但地精已经对你失去了信任。最终，你们变成了陌生人。毕业时，地精没有向你道别就离开了。也许这就是命运，错过的终究是错过的。",
+                    bg: 'classroom'
+                },
+                disaster: {
+                    title: "悲剧结局 - 形同陌路",
+                    message: "你的选择严重伤害了地精的感情。他开始讨厌你，认为你是个虚伪的人。你们之间的每一次互动都充满了火药味。地精甚至在同学面前贬低你，说你是个不懂装懂的伪君子。你试图解释，但他已经不愿意再听。这段本可能美好的感情，就这样彻底破碎了。",
+                    bg: 'afterSchool'
+                }
+            }
+        };
+
+        // DOM元素
+        const startScreen = document.getElementById('start-screen');
+        const startBtn = document.getElementById('start-btn');
+        const endingScreen = document.getElementById('ending-screen');
+        const endingTitle = document.getElementById('ending-title');
+        const endingMessage = document.getElementById('ending-message');
+        const restartBtn = document.getElementById('restart-btn');
+        const background = document.getElementById('background');
+        const character = document.getElementById('character');
+        const characterExpression = document.getElementById('character-expression');
+        const dialogueText = document.getElementById('dialogue-text');
+        const optionsContainer = document.getElementById('options-container');
+        const heartsDisplay = document.getElementById('hearts-display');
+        const heartsPercentage = document.getElementById('hearts-percentage');
+        const progressBar = document.getElementById('progress-bar');
+        const bgm = document.getElementById('bgm');
+        const choiceSound = document.getElementById('choice-sound');
+        const endingSound = document.getElementById('ending-sound');
+        const sceneIndicator = document.getElementById('scene-indicator');
+        const eventTrigger = document.getElementById('event-trigger');
+        const transitionOverlay = document.getElementById('transition-overlay');
+
+        // 初始化游戏
+        function initGame() {
+            updateHearts();
+            startBtn.addEventListener('click', startGame);
+            restartBtn.addEventListener('click', resetGame);
+            eventTrigger.addEventListener('click', advanceDialogue);
+        }
+
+        // 开始游戏
+        function startGame() {
+            gameData.gameStarted = true;
+            gameData.gamePhase = 1;
+            startScreen.style.display = 'none';
+            bgm.volume = 0.3;
+            bgm.play().catch(e => console.log("Audio play failed:", e));
+            nextStoryPoint();
+        }
+
+        // 下一个故事点
+        function nextStoryPoint() {
+            if (gameData.storyProgress >= gameData.storyLines.length) {
+                showEnding();
+                return;
+            }
+            
+            const storyPoint = gameData.storyLines[gameData.storyProgress];
+            
+            // 更新场景
+            background.style.backgroundImage = `url('${gameData.backgrounds[storyPoint.background]}')`;
+            character.style.backgroundImage = `url('${gameData.characterImages[storyPoint.character]}')`;
+            characterExpression.style.backgroundImage = `url('${gameData.characterImages[storyPoint.character]}')`;
+            
+            // 更新场景指示器
+            if (storyPoint.background === 'classroom') {
+                sceneIndicator.textContent = '场景：教室内';
+            } else if (storyPoint.background === 'afterSchool') {
+                sceneIndicator.textContent = '场景：放学后';
+            } else if (storyPoint.background === 'outdoors') {
+                sceneIndicator.textContent = '场景：室外';
+            }
+            
+            // 显示对话
+            dialogueText.textContent = storyPoint.text;
+            
+            // 如果有选项，显示选项；否则等待点击继续
+            if (storyPoint.options) {
+                optionsContainer.style.display = 'block';
+                dialogueText.style.height = '70px';
+                
+                // 生成选项
+                optionsContainer.innerHTML = '';
+                storyPoint.options.forEach((option, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.textContent = option.text;
+                    btn.addEventListener('click', () => makeChoice(option, index));
+                    optionsContainer.appendChild(btn);
+                });
+            } else {
+                optionsContainer.style.display = 'none';
+                dialogueText.style.height = '100px';
+            }
+            
+            gameData.storyProgress++;
+        }
+
+        // 点击对话框继续
+        function advanceDialogue() {
+            if (gameData.gameStarted && !optionsContainer.style.display || optionsContainer.style.display === 'none') {
+                nextStoryPoint();
+            }
+        }
+
+        // 做出选择
+        function makeChoice(option, index) {
+            choiceSound.currentTime = 0;
+            choiceSound.play().catch(e => console.log("Choice sound failed:", e));
+            
+            // 显示选择反馈
+            dialogueText.innerHTML = `<span class="highlight">${option.message}</span>`;
+            optionsContainer.style.display = 'none';
+            
+            // 更新好感度
+            gameData.affection += option.value;
+            
+            // 确保好感度在0-100范围内
+            gameData.affection = Math.max(0, Math.min(100, gameData.affection));
+            
+            // 更新爱心显示
+            updateHearts();
+            
+            // 3秒后继续剧情
+            setTimeout(() => {
+                if (gameData.storyProgress < gameData.storyLines.length) {
+                    nextStoryPoint();
+                } else {
+                    showEnding();
+                }
+            }, 2000);
+        }
+
+        // 更新爱心显示
+        function updateHearts() {
+            const heartsCount = 10;
+            const heartValue = 10; // 每颗心代表10%
+            const fullHearts = Math.floor(gameData.affection / heartValue);
+            const halfHeart = (gameData.affection % heartValue) >= 5 && (gameData.affection % heartValue) !== 0;
+            const emptyHearts = heartsCount - fullHearts - (halfHeart ? 1 : 0);
+            
+            heartsDisplay.innerHTML = '';
+            
+            // 添加满心
+            for (let i = 0; i < fullHearts; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart heart-full';
+                heartsDisplay.appendChild(heart);
+            }
+            
+            // 添加半心
+            if (halfHeart) {
+                const heart = document.createElement('div');
+                heart.className = 'heart heart-half';
+                heartsDisplay.appendChild(heart);
+            }
+            
+            // 添加空心
+            for (let i = 0; i < emptyHearts; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart heart-empty';
+                heartsDisplay.appendChild(heart);
+            }
+            
+            // 更新百分比文字
+            heartsPercentage.textContent = `${gameData.affection}%`;
+            
+            // 更新进度条
+            progressBar.style.width = `${gameData.affection}%`;
+        }
+
+        // 显示结局
+        function showEnding() {
+            let endingType = 'neutral';
+            
+            if (gameData.affection >= 85) {
+                endingType = 'perfect';
+            } else if (gameData.affection >= 70) {
+                endingType = 'good';
+            } else if (gameData.affection >= 30) {
+                endingType = 'neutral';
+            } else if (gameData.affection >= 15) {
+                endingType = 'bad';
+            } else {
+                endingType = 'disaster';
+            }
+            
+            const ending = gameData.endings[endingType];
+            endingTitle.textContent = ending.title;
+            endingMessage.innerHTML = ending.message;
+            
+            // 设置结局背景
+            background.style.backgroundImage = `url('${gameData.backgrounds[ending.bg]}')`;
+            
+            // 播放结局音效
+            endingSound.currentTime = 0;
+            endingSound.play().catch(e => console.log("Ending sound failed:", e));
+            
+            // 如果是好结局，播放BGM
+            if (endingType === 'perfect' || endingType === 'good') {
+                bgm.src = './トゲナシトゲアリ - 荊の薔薇.mp3';
+                bgm.currentTime = 0;
+                bgm.volume = 0.5;
+                bgm.play().catch(e => console.log("BGM play failed:", e));
+            }
+            
+            endingScreen.style.display = 'flex';
+        }
+
+        // 重置游戏
+        function resetGame() {
+            gameData.affection = 50;
+            gameData.storyProgress = 0;
+            gameData.currentCharacterIndex = 0;
+            gameData.currentBackground = 'classroom';
+            gameData.gameStarted = false;
+            gameData.gamePhase = 0;
+            
+            endingScreen.style.display = 'none';
+            startScreen.style.display = 'flex';
+            optionsContainer.style.display = 'none';
+            dialogueText.style.height = '100px';
+            
+            // 重置背景
+            background.style.backgroundImage = `url('${gameData.backgrounds.classroom}')`;
+            character.style.backgroundImage = `url('${gameData.characterImages[0]}')`;
+            characterExpression.style.backgroundImage = `url('${gameData.characterImages[0]}')`;
+            
+            // 重置好感度显示
+            updateHearts();
+            
+            // 停止音频
+            bgm.pause();
+            bgm.currentTime = 0;
+            bgm.src = './トゲナシトゲアリ - 荊の薔薇.mp3';
+        }
+
+        // 启动游戏
+        window.onload = initGame;
+    </script>
+</body>
+</html>
