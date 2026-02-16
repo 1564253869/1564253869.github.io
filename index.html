@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>地精恋物语</title>
     <style>
         * {
@@ -10,31 +10,21 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            height: 100vh;
+            font-family: 'Microsoft YaHei', sans-serif;
             overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
+            background-color: #000;
+            touch-action: manipulation;
         }
-        
+
         #game-container {
             position: relative;
-            width: 100%;
-            max-width: 1200px;
-            height: 800px;
-            margin: 0 auto;
-            border: 4px solid #d4af37;
-            border-radius: 10px;
+            width: 100vw;
+            height: 100vh;
             overflow: hidden;
-            box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
-            background: #000;
         }
-        
+
         #background {
             position: absolute;
             top: 0;
@@ -44,352 +34,228 @@
             background-size: cover;
             background-position: center;
             transition: background-image 1s ease;
-            z-index: 1;
         }
-        
+
         #character {
             position: absolute;
-            bottom: 150px;
+            bottom: 15%;
             left: 50%;
             transform: translateX(-50%);
-            width: 400px;
-            height: 600px;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center bottom;
-            z-index: 2;
+            max-height: 65vh;
+            z-index: 10;
             transition: opacity 0.5s ease;
+            max-width: 90%;
         }
-        
+
         #dialogue-box {
             position: absolute;
-            bottom: 20px;
-            left: 50px;
-            right: 50px;
-            height: 150px;
-            background: rgba(0, 0, 0, 0.85);
-            border: 3px solid #d4af37;
-            border-radius: 15px;
-            padding: 20px;
-            z-index: 3;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
-        }
-        
-        #dialogue-text {
-            height: 100px;
-            overflow-y: auto;
-            font-size: 20px;
-            line-height: 1.5;
-            color: #fff;
-        }
-        
-        #name-tag {
-            position: absolute;
-            top: -30px;
-            left: 20px;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
             background: rgba(0, 0, 0, 0.8);
-            color: #ffd700;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            border: 2px solid #d4af37;
-        }
-        
-        #options-container {
-            position: absolute;
-            bottom: 190px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80%;
-            z-index: 4;
-            display: none;
-        }
-        
-        .option-btn {
-            display: block;
-            width: 100%;
-            margin-bottom: 12px;
-            padding: 15px;
-            background: linear-gradient(to bottom, #4a2c2a, #2c1e1e);
-            color: white;
-            border: 2px solid #d4af37;
-            border-radius: 10px;
-            font-size: 18px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
-        
-        .option-btn:hover {
-            background: linear-gradient(to bottom, #5a3c3a, #3c2e2e);
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
-        }
-        
-        .option-btn:active {
-            transform: translateY(1px);
-        }
-        
-        #hearts-container {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 4;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            border-radius: 10px;
-            border: 2px solid #d4af37;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
-        
-        #hearts-title {
-            font-size: 16px;
-            margin-bottom: 8px;
-            color: #ffd700;
-        }
-        
-        #hearts-display {
-            display: flex;
-            align-items: center;
-        }
-        
-        .heart {
-            width: 32px;
-            height: 32px;
-            margin-left: 5px;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-        }
-        
-        #hearts-percentage {
-            color: white;
-            font-weight: bold;
-            margin-left: 10px;
-            font-size: 20px;
-            min-width: 60px;
-            text-align: center;
-        }
-        
-        #progress-bar-container {
-            width: 100%;
-            height: 20px;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
-            margin-top: 8px;
-            overflow: hidden;
-        }
-        
-        #progress-bar {
-            height: 100%;
-            background: linear-gradient(to right, #ff416c, #ff4b2b);
-            width: 50%;
-            transition: width 0.5s ease;
-        }
-        
-        #start-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)), 
-                        url('./Image_1771244878100_970.jpg');
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
-            color: white;
-            text-align: center;
-        }
-        
-        #start-title {
-            font-size: 60px;
-            color: #ffd700;
-            margin-bottom: 30px;
-            text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
-            font-family: 'SimHei', serif;
-            letter-spacing: 3px;
-        }
-        
-        #start-subtitle {
-            font-size: 24px;
-            margin-bottom: 40px;
-            color: #ccc;
-            max-width: 80%;
-            line-height: 1.6;
-        }
-        
-        #start-btn {
-            padding: 18px 50px;
-            font-size: 26px;
-            background: linear-gradient(to bottom, #4a2c2a, #2c1e1e);
-            color: white;
-            border: 3px solid #d4af37;
             border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
-        }
-        
-        #start-btn:hover {
-            background: linear-gradient(to bottom, #5a3c3a, #3c2e2e);
-            transform: scale(1.05);
-            box-shadow: 0 0 25px rgba(212, 175, 55, 0.8);
-        }
-        
-        #story-text {
-            text-align: center;
-            max-width: 80%;
-            margin: 20px auto;
-            font-size: 20px;
-            line-height: 1.6;
-        }
-        
-        .fade-in {
-            animation: fadeIn 1s ease-in;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .heart-full { 
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23FF0000" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'); 
-        }
-        .heart-half { 
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23FF0000" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09V21.35z"/></svg>'); 
-        }
-        .heart-empty { 
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23555" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'); 
-        }
-        
-        #ending-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 15;
+            padding: 12px;
             color: white;
-            display: none;
-            text-align: center;
-            padding: 30px;
+            z-index: 20;
+            border: 2px solid #ffcc00;
         }
-        
-        #ending-title {
-            font-size: 50px;
-            color: #ffd700;
-            margin-bottom: 30px;
-            text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
-        }
-        
-        #ending-message {
-            font-size: 24px;
-            max-width: 80%;
-            line-height: 1.6;
-            margin-bottom: 40px;
-        }
-        
-        #restart-btn {
-            padding: 18px 50px;
-            font-size: 24px;
-            background: linear-gradient(to bottom, #4a2c2a, #2c1e1e);
-            color: white;
-            border: 3px solid #d4af37;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        #restart-btn:hover {
-            background: linear-gradient(to bottom, #5a3c3a, #3c2e2e);
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.7);
-        }
-        
+
         #character-name {
             position: absolute;
-            bottom: 170px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.7);
-            color: #ffd700;
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-weight: bold;
-            border: 2px solid #d4af37;
-            z-index: 3;
-        }
-        
-        .highlight {
-            color: #ffd700;
-            font-weight: bold;
-        }
-        
-        #game-info {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 4;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 10px 15px;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 6px 12px;
             border-radius: 10px;
-            border: 2px solid #d4af37;
-            font-size: 16px;
-        }
-        
-        #scene-indicator {
-            color: #ffd700;
-            margin-top: 5px;
-        }
-        
-        .transition-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: black;
             z-index: 20;
-            opacity: 0;
-            pointer-events: none;
+            font-weight: bold;
+            border: 1px solid #ffcc00;
+            font-size: 14px;
         }
-        
-        .character-expression {
+
+        #love-bar {
             position: absolute;
-            top: 50px;
-            right: 50px;
+            top: 10px;
+            right: 10px;
             width: 150px;
-            height: 150px;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            z-index: 3;
-            border: 3px solid #d4af37;
-            border-radius: 10px;
+            height: 25px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 12px;
+            z-index: 20;
+            border: 1px solid #ffcc00;
+            overflow: hidden;
         }
-        
-        #event-trigger {
+
+        #love-fill {
+            height: 100%;
+            width: 50%;
+            background: linear-gradient(to right, #ff6b6b, #ffcc00, #6bffb8);
+            transition: width 1s ease;
+        }
+
+        #love-text {
+            position: absolute;
+            top: 3px;
+            right: 5px;
+            color: white;
+            font-weight: bold;
+            z-index: 21;
+            font-size: 12px;
+        }
+
+        #options-container {
+            position: absolute;
+            bottom: 120px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 20;
+        }
+
+        .option-btn {
+            background: rgba(255, 204, 0, 0.9);
+            color: black;
+            border: none;
+            padding: 12px 15px;
+            border-radius: 12px;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid #fff;
+        }
+
+        .option-btn:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: scale(1.02);
+        }
+
+        .option-btn:disabled {
+            background: rgba(100, 100, 100, 0.5);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #title-screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 5;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            color: white;
+        }
+
+        #title-screen h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        #title-screen p {
+            font-size: 16px;
+            margin-bottom: 30px;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        #start-btn {
+            background: rgba(255, 204, 0, 0.9);
+            color: black;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 12px;
+            font-size: 20px;
             cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #start-btn:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: scale(1.05);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 90;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #game-over-screen h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #ffcc00;
+        }
+
+        #game-over-screen p {
+            font-size: 16px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        #restart-btn {
+            background: rgba(255, 204, 0, 0.9);
+            color: black;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 12px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        #restart-btn:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: scale(1.05);
+        }
+
+        #audio-player {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            z-index: 30;
+            opacity: 0.7;
+        }
+
+        #audio-player:hover {
+            opacity: 1;
+        }
+        
+        /* 移动端适配 */
+        @media screen and (max-width: 768px) {
+            #dialogue-text {
+                font-size: 14px;
+                line-height: 1.4;
+            }
+            
+            .option-btn {
+                font-size: 13px;
+                padding: 10px 12px;
+            }
         }
     </style>
 </head>
@@ -397,525 +263,524 @@
     <div id="game-container">
         <div id="background"></div>
         
-        <div id="character"></div>
         <div id="character-name">地精</div>
         
-        <div class="character-expression" id="character-expression"></div>
+        <div id="love-bar">
+            <div id="love-fill" style="width: 50%;"></div>
+            <div id="love-text">好感度: 50%</div>
+        </div>
+        
+        <img id="character" src="./images/地精角色1_20260216211713.jpg" alt="地精角色">
         
         <div id="dialogue-box">
-            <div id="name-tag">地精</div>
-            <div id="dialogue-text">你好，我是地精，很高兴认识你！</div>
+            <p id="dialogue-text">点击开始游戏，与地精展开一段特别的校园生活...</p>
         </div>
         
         <div id="options-container">
             <!-- 选项按钮将通过JavaScript动态生成 -->
         </div>
         
-        <div id="hearts-container">
-            <div id="hearts-title">好感度</div>
-            <div id="hearts-display">
-                <div class="heart heart-full"></div>
-                <div class="heart heart-full"></div>
-                <div class="heart heart-full"></div>
-                <div class="heart heart-full"></div>
-                <div class="heart heart-full"></div>
-                <div class="heart heart-full"></div>
-                <div class="heart heart-full"></div>
-                <div class="heart heart-full"></div>
-                <div class="heart heart-full"></div>
-                <div class="heart heart-full"></div>
-                <span id="hearts-percentage">50%</span>
-            </div>
-            <div id="progress-bar-container">
-                <div id="progress-bar"></div>
-            </div>
-        </div>
-        
-        <div id="game-info">
-            <div>《地精恋物语》</div>
-            <div id="scene-indicator">场景：教室内</div>
-        </div>
-        
-        <div id="event-trigger"></div>
-        
-        <div id="start-screen">
-            <h1 id="start-title">地精恋物语</h1>
-            <p id="start-subtitle">在这个平凡的校园里，你遇到了神秘的地精。他有着独特的爱好，只有真正了解他的人才能走进他的内心世界...</p>
+        <div id="title-screen">
+            <h1>地精恋物语</h1>
+            <p>与神秘的地精展开一段特别的校园生活<br>运用你的智慧提升好感度，获得不同结局！</p>
             <button id="start-btn">开始游戏</button>
         </div>
         
-        <div id="ending-screen">
-            <h1 id="ending-title">结局</h1>
-            <p id="ending-message">这是结局内容</p>
+        <div id="game-over-screen" class="hidden">
+            <h2 id="ending-title">结局标题</h2>
+            <p id="ending-description">结局描述</p>
             <button id="restart-btn">重新开始</button>
         </div>
         
-        <div class="transition-overlay" id="transition-overlay"></div>
+        <audio id="bgm" loop>
+            <source src="./audio/椎名林檎 - 丸ノ内サディスティック (2019 Mix).mp3" type="audio/mpeg">
+        </audio>
+        
+        <audio id="good-ending-audio">
+            <source src="./audio/椎名林檎 - 丸ノ内サディスティック (2019 Mix).mp3" type="audio/mpeg">
+        </audio>
+        
+        <div id="audio-player">
+            <button id="play-pause-btn">🔊</button>
+        </div>
     </div>
-
-    <audio id="bgm" loop>
-        <source src="./トゲナシトゲアリ - 荊の薔薇.mp3" type="audio/mpeg">
-    </audio>
-    
-    <audio id="choice-sound">
-        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFd2xqZ2RjYF1bWVhXVlVUU1JQT05MS0pJSEdGRURDQkFAPz49PDs6OTg3NjU0MzIxMC8uLSwrKikoJyYlJCMiISAfHh0cGxoZGBcWFRQTEhEQDw4NDAsKCQgHBgUEAwIBAA==" type="audio/wav">
-    </audio>
-    
-    <audio id="ending-sound">
-        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFd2xqZ2RjYF1bWVhXVlVUU1JQT05MS0pJSEdGRURDQkFAPz49PDs6OTg3NjU0MzIxMC8uLSwrKikoJyYlJCMiISAfHh0cGxoZGBcWFRQTEhEQDw4NDAsKCQgHBgUEAwIBAA==" type="audio/wav">
-    </audio>
 
     <script>
         // 游戏数据
         const gameData = {
+            love: 50,
+            currentScene: 0,
+            isTransition: false, // 是否为过渡场景
+            isPlaying: false,
+            bgm: document.getElementById('bgm'),
+            goodEndingAudio: document.getElementById('good-ending-audio'),
+            
+            // 角色图片数组
             characterImages: [
-                './Image_1771244672723_517.jpg',
-                './Image_1771244675363_204.jpg',
-                './Image_1771244651034_609.jpg',
-                './Image_1771244660166_74.jpg',
-                './Image_1771244667411_61.jpg'
+                './images/地精角色1_20260216211713.jpg',
+                './images/地精角色2_20260216211734.jpg',
+                './images/地精角色3_20260216211756.jpg',
+                './images/地精角色4_20260216211817.jpg',
+                './images/地精角色5_20260216211837.jpg'
             ],
+            
+            // 背景图片数组
             backgrounds: {
-                classroom: './Image_1771244878100_970.jpg',
-                afterSchool: './Image_1771244786572_557.jpg',
-                outdoors: './Image_1771244838404_590.jpg'
+                classroom: './images/教室背景_20260216211857.jpg',
+                outdoor: './images/室外背景_20260216211920.jpg',
+                classroomInside: './images/教室内背景_20260216211942.jpg'
             },
-            currentCharacterIndex: 0,
-            currentBackground: 'classroom',
-            affection: 50, // 好感度，范围0-100
-            storyProgress: 0, // 故事进度
-            gameStarted: false,
-            gamePhase: 0, // 0: start, 1: intro, 2: main game, 3: ending
             
-            // 扩展的故事剧情
-            storyLines: [
-                // 第一幕 - 初遇
+            // 游戏场景，包含选项场景和过渡场景
+            scenes: [
+                // 第一幕：初遇 (选项场景)
                 {
-                    background: 'classroom',
-                    character: 0,
-                    text: "放学后的教室里，夕阳透过窗户洒在课桌上。一个戴着耳机的同学独自坐在角落，专注地看着手机。",
-                    options: null
-                },
-                {
-                    background: 'classroom',
-                    character: 0,
-                    text: "你走近一看，发现他在玩一款战术游戏。那专注的神情让人不禁好奇...",
-                    options: null
-                },
-                {
-                    background: 'classroom',
-                    character: 0,
-                    text: "你轻声问道：“在玩什么游戏这么入迷？”他抬起头，露出一双深邃的眼睛：“暗区突围，你要试试吗？”",
+                    type: 'choice', // 选项场景
+                    dialogue: "开学第一天，我注意到班级里有个独特的男生。他总是独自一人。同学们说他叫地精，是个暗区突围！！高手。",
                     options: [
-                        { text: "好啊！我也玩过类似的", value: 10, condition: 'good', message: "地精眼睛一亮，显得很高兴！" },
-                        { text: "不太感兴趣，你继续玩吧", value: -5, message: "地精的表情有些失落..." },
-                        { text: "听说过，但没玩过，能介绍下吗？", value: 5, message: "地精开始兴奋地讲起游戏机制" }
-                    ]
+                        { text: "默默观察他，不打扰他的世界", effect: 2, nextDialogue: "地精似乎察觉到了你的目光，抬头看了你一眼，又低下头。" },
+                        { text: "主动走过去打招呼", effect: 5, nextDialogue: "地精有些惊讶，推了推眼镜：'你...你好，我是地精，地精地精地？'" },
+                        { text: "向同学打听他的情况", effect: -2, nextDialogue: "同学们纷纷议论：'他总是在玩那个叫暗区突围的游戏'，'好像生物不太好'。" }
+                    ],
+                    background: 'classroomInside',
+                    characterImage: 0
                 },
-                
-                // 第二幕 - 网络文化
+                // 第一幕过渡：观察后的反应
                 {
+                    type: 'transition', // 过渡场景
+                    dialogue: "几天过去了，你发现自己总是不自觉地关注着地精的一举一动。他上课时专注睡觉的样子，午休时独自坐在角落睡觉的身影，都让你感到莫名的心动。",
                     background: 'classroom',
-                    character: 1,
-                    text: "几天后，地精神秘兮兮地凑近你：“你知道114514是什么意思吗？”",
-                    options: null
+                    characterImage: 0
                 },
+                // 第二幕：生物课 (选项场景)
                 {
-                    background: 'classroom',
-                    character: 1,
-                    text: "你感到困惑，但看到他眼中闪烁的期待...",
+                    type: 'choice',
+                    dialogue: "生物课上，霍伟老登提问细胞分裂的过程。地精被点名回答，但他显然没听课，尴尬地站在那里。",
                     options: [
-                        { text: "当然知道！那是网络上的经典梗", value: 10, condition: 'good', message: "地精激动地握住了你的手！" },
-                        { text: "不知道，是什么意思？", value: -5, message: "地精叹了口气，显得有些失望" },
-                        { text: "好像听过，但记不清了", value: 0, message: "地精开始详细解释这个梗的来源" }
-                    ]
-                },
-                
-                // 第三幕 - 课外活动
-                {
-                    background: 'outdoors',
-                    character: 2,
-                    text: "周末，地精邀请你去网吧。他说：“这里网速快，适合打游戏。”",
-                    options: null
-                },
-                {
-                    background: 'outdoors',
-                    character: 2,
-                    text: "你们并排坐着，屏幕上显示着《暗区突围》的画面。地精操作娴熟，动作行云流水...",
-                    options: null
-                },
-                {
-                    background: 'outdoors',
-                    character: 2,
-                    text: "“要不要一起双排？”地精问，“我可以带你飞。”",
-                    options: [
-                        { text: "好啊！带我上分", value: 10, condition: 'good', message: "地精开心地教你游戏技巧" },
-                        { text: "我技术不好，你先带我熟悉地图", value: 5, message: "地精耐心地为你讲解地图细节" },
-                        { text: "算了，我随便玩玩就好", value: -5, message: "地精略显失落，但依然陪你玩" }
-                    ]
-                },
-                
-                // 第四幕 - 尴尬话题
-                {
+                        { text: "小声提醒他答案", effect: 5, nextDialogue: "地精感激地看了你一眼，顺利回答了问题。霍伟满意地点头。" },
+                        { text: "替他回答，帮他解围", effect: 7, nextDialogue: "你举手补充了答案，霍伟表扬了你，地精向你投来感激的目光。" },
+                        { text: "偷偷递纸条给他", effect: 3, nextDialogue: "地精接过纸条，成功回答了问题，但被霍伟警告不要传纸条。" }
+                    ],
                     background: 'classroom',
-                    character: 3,
-                    text: "回到学校，地精神秘地说：“你知道柳科企最近换了什么吗？”",
-                    options: null
+                    characterImage: 1
                 },
+                // 第二幕过渡：课后交流
                 {
+                    type: 'transition',
+                    dialogue: "下课后，地精主动走到你身边，低声说了句'谢谢'。这是他第一次主动和你说话，你感到心跳加速。",
                     background: 'classroom',
-                    character: 3,
-                    text: "你感到有些不安，但地精眼神中带着一丝期待...",
-                    options: [
-                        { text: "不太懂，但你似乎很兴奋", value: 5, message: "地精神秘地笑了笑" },
-                        { text: "别说了，这个话题不合适", value: -10, condition: 'bad', message: "地精的表情瞬间变得尴尬" },
-                        { text: "（靠近他）告诉我吧，我不会告诉别人的", value: 10, condition: 'good', message: "地精凑近你耳边小声说" }
-                    ]
+                    characterImage: 1
                 },
-                
-                // 第五幕 - 学业压力
+                // 第三幕：课间交流 (选项场景)
                 {
+                    type: 'choice',
+                    dialogue: "课间休息时，你看到地精还在座位上和人聊手机游戏。",
+                    options: [
+                        { text: "好奇地问他在聊什么游戏", effect: 10, nextDialogue: "地精眼睛一亮：'是暗区突围！你要不要也试试'他显得很兴奋。" },
+                        { text: "建议他出去活动一下", effect: -3, nextDialogue: "地精摇摇头：'不用了，我还要打游戏，那个老登布置的作业还没写完...'（挎着b脸）" },
+                        { text: "分享一些有趣的事情", effect: 5, nextDialogue: "地精抬起头：'嗯...听起来挺有意思的。'" }
+                    ],
                     background: 'classroom',
-                    character: 4,
-                    text: "生物课后，地精愁眉苦脸地坐在座位上。生物老师霍伟刚刚宣布了期中考试成绩。",
-                    options: null
+                    characterImage: 1
                 },
+                // 第三幕过渡：共同话题
                 {
+                    type: 'transition',
+                    dialogue: "通过交谈，你发现地精对游戏有着深入的了解，他眼中闪烁着热情的光芒，这和平时沉默寡言的他完全不同。",
                     background: 'classroom',
-                    character: 4,
-                    text: "你注意到地精的生物成绩并不理想，而霍伟老师正在朝这边走来...",
+                    characterImage: 2
+                },
+                // 第四幕：食堂相遇 (选项场景)
+                {
+                    type: 'choice',
+                    dialogue: "午餐时间，你在食堂排队打饭，意外发现地精也在队伍里。",
                     options: [
-                        { text: "别担心，生物作业我帮你做", value: -10, condition: 'bad', message: "地精摇摇头，坚持要自己完成" },
-                        { text: "要不要我陪你复习生物？", value: 5, message: "地精感激地点点头" },
-                        { text: "算了，我们去玩游戏放松一下", value: 10, condition: 'good', message: "地精眼睛一亮，立即同意" }
-                    ]
-                },
-                
-                // 第六幕 - 心灵交流
-                {
-                    background: 'outdoors',
-                    character: 0,
-                    text: "黄昏时分，你们来到学校天台。地精望着夕阳，若有所思...",
-                    options: null
-                },
-                {
-                    background: 'outdoors',
-                    character: 0,
-                    text: "“你知道吗？其实我有很多爱好，但很少有人能理解。”地精的声音有些低沉。",
-                    options: null
-                },
-                {
-                    background: 'outdoors',
-                    character: 0,
-                    text: "你静静地听着，感受着他内心的孤独...",
-                    options: [
-                        { text: "我能理解，我也有很多小众爱好", value: 10, condition: 'good', message: "地精眼中闪过一丝光芒" },
-                        { text: "告诉我你的爱好，我会试着理解", value: 5, message: "地精开始分享他的兴趣" },
-                        { text: "每个人都有自己的独特之处", value: 0, message: "地精点点头，似乎在思考什么" }
-                    ]
-                },
-                
-                // 第七幕 - 暧昧时刻
-                {
+                        { text: "主动和他一起排队聊天", effect: 8, nextDialogue: "地精有些紧张但还是和你聊了起来：'你平时都玩什么游戏？'" },
+                        { text: "远远地看着他，没有靠近", effect: 0, nextDialogue: "地精独自吃完饭，很快离开了食堂。" },
+                        { text: "邀请他坐到你旁边", effect: 10, nextDialogue: "地精犹豫了一下，最终同意了：'好...好吧，不过我吃饭比较地精地精地精。'" }
+                    ],
                     background: 'classroom',
-                    character: 1,
-                    text: "晚自习后，教室里只剩下你们两人。地精突然凑近你...",
-                    options: null
+                    characterImage: 2
                 },
+                // 第四幕过渡：友谊加深
                 {
+                    type: 'transition',
+                    dialogue: "从那天起，地精开始偶尔和你一起吃饭。虽然话不多，但你能感受到他内心的温暖。你们之间的距离在慢慢拉近。",
                     background: 'classroom',
-                    character: 1,
-                    text: "他的呼吸轻轻拂过你的耳畔，心跳加速...",
+                    characterImage: 2
+                },
+                // 第五幕：114514梗 (选项场景)
+                {
+                    type: 'choice',
+                    dialogue: "下午自习课，地精在笔记本上写写画画，似乎在记录什么。",
                     options: [
-                        { text: "（脸红）你在干什么？", value: 5, message: "地精轻笑一声，没有回答" },
-                        { text: "（也靠近他）我也想...", value: 10, condition: 'good', message: "地精的呼吸变得急促" },
-                        { text: "（推开他）这样不行", value: -5, message: "地精有些失望，但尊重你的决定" }
-                    ]
+                        { text: "凑近看看他在写什么", effect: 7, nextDialogue: "地精迅速合上笔记本：'没...没什么，就是随便写写。'" },
+                        { text: "突然说出'1BF52'这个数字", effect: 15, nextDialogue: "地精猛地抬起头，眼中闪着惊喜：'潘博文？'他变得异常兴奋。" },
+                        { text: "问他要不要一起去买饮料", effect: 5, nextDialogue: "地精摇摇头：'死妈济南一中超市里有个鸡巴'" }
+                    ],
+                    background: 'classroomInside',
+                    characterImage: 2
                 },
-                
-                // 第八幕 - 最终告白
+                // 第五幕过渡：共鸣时刻
                 {
-                    background: 'outdoors',
-                    character: 2,
-                    text: "毕业前夕，地精约你来到学校后花园。樱花飘落，美如仙境。",
-                    options: null
+                    type: 'transition',
+                    dialogue: "得知你也懂得网络文化，地精打开了心扉。他开始和你分享更多有趣的事情，你们的友谊变得更加深厚。",
+                    background: 'classroom',
+                    characterImage: 3
                 },
+                // 第六幕：放学时光 (选项场景)
                 {
-                    background: 'outdoors',
-                    character: 2,
-                    text: "他深吸一口气，似乎在鼓起勇气说什么...",
-                    options: null
-                },
-                {
-                    background: 'outdoors',
-                    character: 2,
-                    text: "“我...我喜欢你。”地精终于说出了这句话，脸上泛起红晕。",
+                    type: 'choice',
+                    dialogue: "放学了，大部分同学都走了，地精却还在教室里。",
                     options: [
-                        { text: "我也喜欢你，地精", value: 10, condition: 'good', message: "地精眼中充满喜悦" },
-                        { text: "我很感动，但我需要时间考虑", value: 0, message: "地精点点头，表示理解" },
-                        { text: "我们只适合做朋友", value: -10, condition: 'bad', message: "地精的表情瞬间黯淡" }
-                    ]
+                        { text: "问他为什么还不回家", effect: 8, nextDialogue: "地精叹了口气：'家里人都死光了，回去也是一个人，不如在学校待着。'" },
+                        { text: "提议一起去网吧", effect: 10, nextDialogue: "地精眼睛一亮：'网吧？可以啊，我知道附近有个不错的地方。'" },
+                        { text: "邀请他参加课外活动", effect: 5, nextDialogue: "地精摇摇头：'操你妈，没活。'" }
+                    ],
+                    background: 'classroom',
+                    characterImage: 0
+                },
+                // 第六幕过渡：深入了解
+                {
+                    type: 'transition',
+                    dialogue: "通过交谈，你了解到地精的家庭情况。他父母死光了，所以他习惯了独处。你开始想要更多地陪伴他。",
+                    background: 'outdoor',
+                    characterImage: 0
+                },
+                // 第七幕：游戏讨论 (选项场景)
+                {
+                    type: 'choice',
+                    dialogue: "在网吧，你和地精一起玩了一款新游戏。",
+                    options: [
+                        { text: "称赞他的操作技巧", effect: 12, nextDialogue: "地精谦虚地笑了笑：'还行吧，毕竟献祭了家人。'" },
+                        { text: "请教他游戏技巧", effect: 10, nextDialogue: "地精耐心地教你：'菜逼'" },
+                        { text: "抱怨游戏太难", effect: -5, nextDialogue: "地精有些失望：'6'" }
+                    ],
+                    background: 'classroom',
+                    characterImage: 3
+                },
+                // 第七幕过渡：默契配合
+                {
+                    type: 'transition',
+                    dialogue: "在游戏里，你们配合得非常默契。地精的脸上露出了久违的笑容，你们的友谊在游戏中得到了升华。",
+                    background: 'classroom',
+                    characterImage: 3
+                },
+                // 第八幕：生物老师话题 (选项场景)
+                {
+                    type: 'choice',
+                    dialogue: "回家路上，你们聊起了今天的生物课。",
+                    options: [
+                        { text: "提到生物老师的严格", effect: -10, nextDialogue: "地精立刻变脸：'别提那个霍伟老登了'" },
+                        { text: "问他生物课有什么困难", effect: 5, nextDialogue: "地精低头：'很多地方都不懂，但不想麻烦别人。'" },
+                        { text: "转移话题到游戏上", effect: 8, nextDialogue: "地精立刻活跃起来：'对了，你知道最近游戏有什么新活动吗？'" }
+                    ],
+                    background: 'outdoor',
+                    characterImage: 0
+                },
+                // 第八幕过渡：情感波动
+                {
+                    type: 'transition',
+                    dialogue: "每当提及生物课相关的话题，地精的情绪就会变得低落。你决定要帮助他克服这个困扰，让他知道你始终支持他。",
+                    background: 'outdoor',
+                    characterImage: 1
+                },
+                // 第九幕：暧昧举动 (选项场景)
+                {
+                    type: 'choice',
+                    dialogue: "周末，你和地精在公园散步。夕阳西下，气氛很美好。",
+                    options: [
+                        { text: "赞美夕阳的美景", effect: 5, nextDialogue: "地精看了看天空：'确实很美...不过兄弟你好香。'（脸红）" },
+                        { text: "悄悄靠近他，轻抚他的头发", effect: 20, nextDialogue: "地精身体一颤，脸红得像苹果：'哦齁齁齁齁齁。" },
+                        { text: "开玩笑说他应该多交朋友", effect: 3, nextDialogue: "地精低头：'我是你爹。'" }
+                    ],
+                    background: 'outdoor',
+                    characterImage: 2
+                },
+                // 第九幕过渡：心动时刻
+                {
+                    type: 'transition',
+                    dialogue: "那一刻，你们的眼神交汇，空气中弥漫着甜蜜的气息。你感觉到彼此的心跳都在加速，一种特殊的情感在心中萌芽。",
+                    background: 'outdoor',
+                    characterImage: 2
+                },
+                // 第十幕：生物作业 (选项场景)
+                {
+                    type: 'choice',
+                    dialogue: "晚上，地精在QQ上发消息说生物作业不会做。",
+                    options: [
+                        { text: "主动提出帮他解答", effect: 10, nextDialogue: "地精感激地说：'真的吗？你人太好了！'但他还是有些犹豫。" },
+                        { text: "建议他去看教学视频", effect: 5, nextDialogue: "地精回复：'我试过，但总是注意力不集中...'" },
+                        { text: "说生物作业太简单了", effect: -10, nextDialogue: "地精回复：'说得轻松...你不知道我有多讨厌生物课。'" }
+                    ],
+                    background: 'classroom',
+                    characterImage: 1
+                },
+                // 第十幕过渡：贴心关怀
+                {
+                    type: 'transition',
+                    dialogue: "你耐心地为地精讲解生物题目，他认真地听着。渐渐地，他的生物成绩有所提高，更重要的是，你们的关系也更进一步。",
+                    background: 'classroom',
+                    characterImage: 1
+                },
+                // 第十一幕：自慰话题 (选项场景)
+                {
+                    type: 'choice',
+                    dialogue: "深夜，地精在群里发了一张游戏截图。",
+                    options: [
+                        { text: "夸奖他的游戏成就", effect: 10, nextDialogue: "地精回复：'原神牛逼'" },
+                        { text: "问他为什么这么晚还不睡", effect: 7, nextDialogue: "地精：'睡不着，习惯了晚上卢观，这是我的自慰方式。'" },
+                        { text: "建议他早点休息", effect: -3, nextDialogue: "地精：'666你爹找你聊天呢'" }
+                    ],
+                    background: 'classroom',
+                    characterImage: 3
+                },
+                // 第十一幕过渡：深夜谈心
+                {
+                    type: 'transition',
+                    dialogue: "你告诉地精，有人在关心着他，让他不要总是一个人承受压力。从此，你们经常深夜聊天，分享彼此的内心世界。",
+                    background: 'classroom',
+                    characterImage: 3
+                },
+                // 第十二幕：美女话题 (选项场景)
+                {
+                    type: 'choice',
+                    dialogue: "你和地精聊起网上的热门话题。",
+                    options: [
+                        { text: "分享一张美女网红的照片", effect: 15, nextDialogue: "地精评论：'确实不错...不过我还是更关注她的胸。'" },
+                        { text: "讨论明星八卦", effect: 5, nextDialogue: "地精兴趣不大：'我对这些不太感兴趣。'" },
+                        { text: "分享搞笑视频", effect: 8, nextDialogue: "地精笑了：'我的刀盾？'" }
+                    ],
+                    background: 'classroomInside',
+                    characterImage: 4
+                },
+                // 第十二幕过渡：价值观契合
+                {
+                    type: 'transition',
+                    dialogue: "你发现地精虽然喜欢游戏和网络文化，但他也有着独特的审美观和价值观。你们的三观逐渐趋于一致。",
+                    background: 'classroom',
+                    characterImage: 4
+                },
+                // 第十三幕：柳科企话题 (选项场景)
+                {
+                    type: 'choice',
+                    dialogue: "同学群有人在讨论某个品牌的话题。",
+                    options: [
+                        { text: "附和大家的讨论", effect: 0, nextDialogue: "地精没有参与讨论，默默地退出了群聊。" },
+                        { text: "提到柳科企的内裤品牌", effect: -20, nextDialogue: "地精立刻生气：'啊？！谁提这个的？好恶心！'他退出了群聊。" },
+                        { text: "转移话题到游戏上", effect: 10, nextDialogue: "地精：'对，游戏里今天有新活动，要不要一起？'气氛重新活跃起来。" }
+                    ],
+                    background: 'classroom',
+                    characterImage: 0
+                },
+                // 第十三幕过渡：保护他的底线
+                {
+                    type: 'transition',
+                    dialogue: "你学会了避免触碰地精的雷区，尊重他的底线。这让你们的友谊更加稳固，他也更加信任你。",
+                    background: 'classroom',
+                    characterImage: 0
+                },
+                // 第十四幕：生物成绩 (选项场景)
+                {
+                    type: 'choice',
+                    dialogue: "生物成绩公布了，地精考得很不理想。",
+                    options: [
+                        { text: "安慰他下次会更好", effect: 10, nextDialogue: "地精眼眶有些湿润：'谢谢你...很少有人会安慰我。'" },
+                        { text: "建议他找家教补习", effect: -10, nextDialogue: "地精情绪激动：'我不想补习，一想到生物就烦！'" },
+                        { text: "告诉他成绩不是最重要的", effect: 15, nextDialogue: "地精看着你：'你真的这么认为吗？'眼中有了光芒。" }
+                    ],
+                    background: 'classroom',
+                    characterImage: 1
+                },
+                // 第十四幕过渡：成长与支持
+                {
+                    type: 'transition',
+                    dialogue: "在你的鼓励下，地精逐渐改变了对生物课的态度。虽然成绩提升缓慢，但他不再逃避，而是勇敢面对。",
+                    background: 'classroom',
+                    characterImage: 1
+                },
+                // 第十五幕：最终选择 (选项场景)
+                {
+                    type: 'choice',
+                    dialogue: "学期结束，你意识到自己已经深深喜欢上了地精。现在是你表达心意的时候了。",
+                    options: [
+                        { text: "告诉他你的真实感受", effect: 20, nextDialogue: "地精震惊地看着你，随后露出了温暖的笑容：'我...我也一直在注意你...'" },
+                        { text: "邀请他假期继续一起玩游戏", effect: 15, nextDialogue: "地精害羞地点头：'好啊，不过不要告诉别人我们经常一起玩。'" },
+                        { text: "承诺会一直支持他的兴趣爱好", effect: 18, nextDialogue: "地精感动得几乎要哭：'从来没有人为我考虑这么多...'" }
+                    ],
+                    background: 'outdoor',
+                    characterImage: 4
                 }
-            ],
-            
-            endings: {
-                perfect: {
-                    title: "完美结局 - 永恒的羁绊",
-                    message: "经过长时间的相处，你完全理解了地精的独特爱好。你们不仅成为了情侣，还一起探索各种小众文化。每当夜深人静时，你们会一起玩游戏、讨论网络梗，有时也会做一些私密的小事。地精说，你是他遇到的唯一能够理解他全部的人。你们的爱情如同樱花般美丽，永远绽放。",
-                    bg: 'outdoors'
-                },
-                good: {
-                    title: "幸福结局 - 心意相通",
-                    message: "你成功赢得了地精的心。虽然不能完全理解他的所有爱好，但你愿意尝试接受。你们经常一起玩游戏，在网络世界中寻找乐趣。地精偶尔会跟你分享一些小众的网络文化，而你也学会了欣赏他的独特之处。你们的关系稳定而甜蜜，虽然偶有分歧，但总能互相包容。",
-                    bg: 'classroom'
-                },
-                neutral: {
-                    title: "普通结局 - 友谊长存",
-                    message: "你们成为了很好的朋友。虽然你和地精之间有好感，但始终无法跨越最后一步。你们依然会一起玩游戏，分享网络趣事，但关系止步于友谊。有时候你会想，如果当初的选择不同，结果会不会不一样呢？无论如何，这段经历让你们都成长了。",
-                    bg: 'classroom'
-                },
-                bad: {
-                    title: "遗憾结局 - 错失良缘",
-                    message: "由于多次选择不当，你和地精的关系逐渐疏远。他对你的兴趣减退，开始回避与你交流。你试图挽回，但地精已经对你失去了信任。最终，你们变成了陌生人。毕业时，地精没有向你道别就离开了。也许这就是命运，错过的终究是错过的。",
-                    bg: 'classroom'
-                },
-                disaster: {
-                    title: "悲剧结局 - 形同陌路",
-                    message: "你的选择严重伤害了地精的感情。他开始讨厌你，认为你是个虚伪的人。你们之间的每一次互动都充满了火药味。地精甚至在同学面前贬低你，说你是个不懂装懂的伪君子。你试图解释，但他已经不愿意再听。这段本可能美好的感情，就这样彻底破碎了。",
-                    bg: 'afterSchool'
-                }
-            }
+            ]
         };
 
-        // DOM元素
-        const startScreen = document.getElementById('start-screen');
-        const startBtn = document.getElementById('start-btn');
-        const endingScreen = document.getElementById('ending-screen');
-        const endingTitle = document.getElementById('ending-title');
-        const endingMessage = document.getElementById('ending-message');
-        const restartBtn = document.getElementById('restart-btn');
-        const background = document.getElementById('background');
-        const character = document.getElementById('character');
-        const characterExpression = document.getElementById('character-expression');
+        // DOM 元素
         const dialogueText = document.getElementById('dialogue-text');
         const optionsContainer = document.getElementById('options-container');
-        const heartsDisplay = document.getElementById('hearts-display');
-        const heartsPercentage = document.getElementById('hearts-percentage');
-        const progressBar = document.getElementById('progress-bar');
-        const bgm = document.getElementById('bgm');
-        const choiceSound = document.getElementById('choice-sound');
-        const endingSound = document.getElementById('ending-sound');
-        const sceneIndicator = document.getElementById('scene-indicator');
-        const eventTrigger = document.getElementById('event-trigger');
-        const transitionOverlay = document.getElementById('transition-overlay');
+        const characterImg = document.getElementById('character');
+        const backgroundDiv = document.getElementById('background');
+        const loveFill = document.getElementById('love-fill');
+        const loveText = document.getElementById('love-text');
+        const titleScreen = document.getElementById('title-screen');
+        const startBtn = document.getElementById('start-btn');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const endingTitle = document.getElementById('ending-title');
+        const endingDescription = document.getElementById('ending-description');
+        const restartBtn = document.getElementById('restart-btn');
+        const playPauseBtn = document.getElementById('play-pause-btn');
 
-        // 初始化游戏
-        function initGame() {
-            updateHearts();
-            startBtn.addEventListener('click', startGame);
-            restartBtn.addEventListener('click', resetGame);
-            eventTrigger.addEventListener('click', advanceDialogue);
+        // 更新好感度显示
+        function updateLoveBar() {
+            const percentage = Math.max(0, Math.min(100, gameData.love));
+            loveFill.style.width = percentage + '%';
+            loveText.textContent = `好感度: ${Math.round(percentage)}%`;
+            
+            // 根据好感度改变颜色
+            if (percentage >= 80) {
+                loveFill.style.background = 'linear-gradient(to right, #ff6b6b, #ffcc00, #6bffb8)';
+            } else if (percentage >= 50) {
+                loveFill.style.background = 'linear-gradient(to right, #ff6b6b, #ffcc00)';
+            } else {
+                loveFill.style.background = 'linear-gradient(to right, #6bffb8, #ff6b6b)';
+            }
         }
 
-        // 开始游戏
-        function startGame() {
-            gameData.gameStarted = true;
-            gameData.gamePhase = 1;
-            startScreen.style.display = 'none';
-            bgm.volume = 0.3;
-            bgm.play().catch(e => console.log("Audio play failed:", e));
-            nextStoryPoint();
-        }
-
-        // 下一个故事点
-        function nextStoryPoint() {
-            if (gameData.storyProgress >= gameData.storyLines.length) {
+        // 显示场景
+        function showScene(sceneIndex) {
+            if (sceneIndex >= gameData.scenes.length) {
                 showEnding();
                 return;
             }
             
-            const storyPoint = gameData.storyLines[gameData.storyProgress];
+            const scene = gameData.scenes[sceneIndex];
             
-            // 更新场景
-            background.style.backgroundImage = `url('${gameData.backgrounds[storyPoint.background]}')`;
-            character.style.backgroundImage = `url('${gameData.characterImages[storyPoint.character]}')`;
-            characterExpression.style.backgroundImage = `url('${gameData.characterImages[storyPoint.character]}')`;
+            // 更新背景和角色图片
+            backgroundDiv.style.backgroundImage = `url('${gameData.backgrounds[scene.background]}')`;
+            characterImg.src = gameData.characterImages[scene.characterImage];
             
-            // 更新场景指示器
-            if (storyPoint.background === 'classroom') {
-                sceneIndicator.textContent = '场景：教室内';
-            } else if (storyPoint.background === 'afterSchool') {
-                sceneIndicator.textContent = '场景：放学后';
-            } else if (storyPoint.background === 'outdoors') {
-                sceneIndicator.textContent = '场景：室外';
-            }
-            
-            // 显示对话
-            dialogueText.textContent = storyPoint.text;
-            
-            // 如果有选项，显示选项；否则等待点击继续
-            if (storyPoint.options) {
-                optionsContainer.style.display = 'block';
-                dialogueText.style.height = '70px';
+            // 根据场景类型显示内容
+            if (scene.type === 'choice') {
+                // 选项场景：显示对话和选项
+                dialogueText.textContent = scene.dialogue;
                 
-                // 生成选项
+                // 清空现有选项
                 optionsContainer.innerHTML = '';
-                storyPoint.options.forEach((option, index) => {
-                    const btn = document.createElement('button');
-                    btn.className = 'option-btn';
-                    btn.textContent = option.text;
-                    btn.addEventListener('click', () => makeChoice(option, index));
-                    optionsContainer.appendChild(btn);
+                
+                // 创建选项按钮
+                scene.options.forEach((option, index) => {
+                    const button = document.createElement('button');
+                    button.className = 'option-btn';
+                    button.textContent = option.text;
+                    button.onclick = () => handleOptionClick(option, sceneIndex);
+                    optionsContainer.appendChild(button);
                 });
-            } else {
-                optionsContainer.style.display = 'none';
-                dialogueText.style.height = '100px';
+            } else if (scene.type === 'transition') {
+                // 过渡场景：只显示对话，无选项
+                dialogueText.textContent = scene.dialogue;
+                
+                // 清空选项容器
+                optionsContainer.innerHTML = '';
+                
+                // 自动进入下一场景
+                setTimeout(() => {
+                    gameData.currentScene++;
+                    if (gameData.currentScene < gameData.scenes.length) {
+                        showScene(gameData.currentScene);
+                    } else {
+                        showEnding();
+                    }
+                }, 3000); // 3秒后自动切换
             }
-            
-            gameData.storyProgress++;
         }
 
-        // 点击对话框继续
-        function advanceDialogue() {
-            if (gameData.gameStarted && !optionsContainer.style.display || optionsContainer.style.display === 'none') {
-                nextStoryPoint();
-            }
-        }
-
-        // 做出选择
-        function makeChoice(option, index) {
-            choiceSound.currentTime = 0;
-            choiceSound.play().catch(e => console.log("Choice sound failed:", e));
-            
-            // 显示选择反馈
-            dialogueText.innerHTML = `<span class="highlight">${option.message}</span>`;
-            optionsContainer.style.display = 'none';
-            
+        // 处理选项点击
+        function handleOptionClick(option, sceneIndex) {
             // 更新好感度
-            gameData.affection += option.value;
+            gameData.love += option.effect;
+            updateLoveBar();
             
-            // 确保好感度在0-100范围内
-            gameData.affection = Math.max(0, Math.min(100, gameData.affection));
+            // 显示选项结果对话
+            dialogueText.textContent = option.nextDialogue;
             
-            // 更新爱心显示
-            updateHearts();
+            // 禁用所有选项按钮
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.disabled = true;
+            });
             
-            // 3秒后继续剧情
+            // 延迟进入下一场景
             setTimeout(() => {
-                if (gameData.storyProgress < gameData.storyLines.length) {
-                    nextStoryPoint();
+                gameData.currentScene++;
+                if (gameData.currentScene < gameData.scenes.length) {
+                    showScene(gameData.currentScene);
                 } else {
-                    showEnding();
+                    setTimeout(showEnding, 2000);
                 }
             }, 2000);
         }
 
-        // 更新爱心显示
-        function updateHearts() {
-            const heartsCount = 10;
-            const heartValue = 10; // 每颗心代表10%
-            const fullHearts = Math.floor(gameData.affection / heartValue);
-            const halfHeart = (gameData.affection % heartValue) >= 5 && (gameData.affection % heartValue) !== 0;
-            const emptyHearts = heartsCount - fullHearts - (halfHeart ? 1 : 0);
-            
-            heartsDisplay.innerHTML = '';
-            
-            // 添加满心
-            for (let i = 0; i < fullHearts; i++) {
-                const heart = document.createElement('div');
-                heart.className = 'heart heart-full';
-                heartsDisplay.appendChild(heart);
-            }
-            
-            // 添加半心
-            if (halfHeart) {
-                const heart = document.createElement('div');
-                heart.className = 'heart heart-half';
-                heartsDisplay.appendChild(heart);
-            }
-            
-            // 添加空心
-            for (let i = 0; i < emptyHearts; i++) {
-                const heart = document.createElement('div');
-                heart.className = 'heart heart-empty';
-                heartsDisplay.appendChild(heart);
-            }
-            
-            // 更新百分比文字
-            heartsPercentage.textContent = `${gameData.affection}%`;
-            
-            // 更新进度条
-            progressBar.style.width = `${gameData.affection}%`;
-        }
-
         // 显示结局
         function showEnding() {
-            let endingType = 'neutral';
+            let endingType, title, description;
             
-            if (gameData.affection >= 85) {
-                endingType = 'perfect';
-            } else if (gameData.affection >= 70) {
+            if (gameData.love >= 85) {
                 endingType = 'good';
-            } else if (gameData.affection >= 30) {
-                endingType = 'neutral';
-            } else if (gameData.affection >= 15) {
-                endingType = 'bad';
+                title = '完美结局 - 永远在一起';
+                description = '经过一学期的相处，地精对你产生了深深的爱意。他终于放下了心中的防备，愿意与你分享他的世界。你们成为了最亲密的恋人，他承诺永远只为你一个人打游戏，只为你一个人露出笑容。"兄弟，屁眼借我用一下"';
+                
+                // 播放好结局音乐
+                gameData.goodEndingAudio.play().catch(e => console.log('音频播放失败:', e));
+            } else if (gameData.love >= 50) {
+                endingType = 'normal';
+                title = '普通结局 - 好朋友';
+                description = '你们成为了最好的朋友，地精愿意向你敞开心扉，分享他的兴趣爱好和日常生活。虽然没有成为给，但这份深厚的友谊也弥足珍贵。他还会找你一起玩游戏，一起度过高三的时光。';
             } else {
-                endingType = 'disaster';
+                endingType = 'bad';
+                title = '坏结局 - 渐行渐远';
+                description = '由于你多次触犯地精的雷区，他对你的印象越来越差。最终，他开始疏远你，不再与你交流。你失去了了解他内心世界的机会，只能远远地看着他继续沉浸在自己的游戏中。"死妈了，滚"';
             }
             
-            const ending = gameData.endings[endingType];
-            endingTitle.textContent = ending.title;
-            endingMessage.innerHTML = ending.message;
-            
-            // 设置结局背景
-            background.style.backgroundImage = `url('${gameData.backgrounds[ending.bg]}')`;
-            
-            // 播放结局音效
-            endingSound.currentTime = 0;
-            endingSound.play().catch(e => console.log("Ending sound failed:", e));
-            
-            // 如果是好结局，播放BGM
-            if (endingType === 'perfect' || endingType === 'good') {
-                bgm.src = './トゲナシトゲアリ - 荊の薔薇.mp3';
-                bgm.currentTime = 0;
-                bgm.volume = 0.5;
-                bgm.play().catch(e => console.log("BGM play failed:", e));
+            endingTitle.textContent = title;
+            endingDescription.textContent = description;
+            gameOverScreen.classList.remove('hidden');
+        }
+
+        // 开始游戏
+        function startGame() {
+            titleScreen.classList.add('hidden');
+            gameData.love = 50; // 重置好感度
+            gameData.currentScene = 0; // 重置场景
+            updateLoveBar();
+            showScene(0);
+        }
+
+        // 重新开始游戏
+        function restartGame() {
+            gameOverScreen.classList.add('hidden');
+            gameData.love = 50; // 重置好感度
+            gameData.currentScene = 0; // 重置场景
+            updateLoveBar();
+            showScene(0);
+        }
+
+        // 音频控制
+        function toggleAudio() {
+            if (gameData.isPlaying) {
+                gameData.bgm.pause();
+                playPauseBtn.textContent = '🔇';
+            } else {
+                gameData.bgm.play().catch(e => console.log('BGM播放失败:', e));
+                playPauseBtn.textContent = '🔊';
             }
-            
-            endingScreen.style.display = 'flex';
+            gameData.isPlaying = !gameData.isPlaying;
         }
 
-        // 重置游戏
-        function resetGame() {
-            gameData.affection = 50;
-            gameData.storyProgress = 0;
-            gameData.currentCharacterIndex = 0;
-            gameData.currentBackground = 'classroom';
-            gameData.gameStarted = false;
-            gameData.gamePhase = 0;
-            
-            endingScreen.style.display = 'none';
-            startScreen.style.display = 'flex';
-            optionsContainer.style.display = 'none';
-            dialogueText.style.height = '100px';
-            
-            // 重置背景
-            background.style.backgroundImage = `url('${gameData.backgrounds.classroom}')`;
-            character.style.backgroundImage = `url('${gameData.characterImages[0]}')`;
-            characterExpression.style.backgroundImage = `url('${gameData.characterImages[0]}')`;
-            
-            // 重置好感度显示
-            updateHearts();
-            
-            // 停止音频
-            bgm.pause();
-            bgm.currentTime = 0;
-            bgm.src = './トゲナシトゲアリ - 荊の薔薇.mp3';
-        }
+        // 事件监听器
+        startBtn.addEventListener('click', startGame);
+        restartBtn.addEventListener('click', restartGame);
+        playPauseBtn.addEventListener('click', toggleAudio);
 
-        // 启动游戏
-        window.onload = initGame;
+        // 初始化好感度显示
+        updateLoveBar();
     </script>
 </body>
 </html>
